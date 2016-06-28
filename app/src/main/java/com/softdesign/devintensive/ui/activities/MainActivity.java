@@ -1,11 +1,11 @@
 package com.softdesign.devintensive.ui.activities;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.softdesign.devintensive.R;
+import com.softdesign.devintensive.data.managers.DataManager;
+import com.softdesign.devintensive.ui.custom.CircleImageView;
 import com.softdesign.devintensive.utils.ConstantManager;
 
 import java.util.ArrayList;
@@ -31,7 +33,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private FloatingActionButton mFloatingActionButton;
     private EditText mUserPhone, mUserEmail, mUserVk, mUserGit, mUserAbout;
 
-    private List<EditText> mUserInfo;
+    private DataManager mDataManager;
+
+    private List<EditText> mUserInfoViews;
 
     private int mCurrentEditMode = 0;
 
@@ -40,10 +44,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mDataManager = DataManager.getInstance();
+
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mNavigationDrawer = (DrawerLayout) findViewById(R.id.navigation_drawer);
         mFloatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        CircleImageView circlePhoto = (CircleImageView) navigationView.getHeaderView(0)
+                .findViewById(R.id.nav_photo_circle);
+        circlePhoto.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.photo_120));
+
 
         //TODO Использовать для инициализации ButterKnife
         mUserPhone = (EditText) findViewById(R.id.phone_et);
@@ -52,17 +64,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mUserGit = (EditText) findViewById(R.id.repository_et);
         mUserAbout = (EditText) findViewById(R.id.about_et);
 
-        mUserInfo = new ArrayList<>();
-        mUserInfo.add(mUserPhone);
-        mUserInfo.add(mUserEmail);
-        mUserInfo.add(mUserVk);
-        mUserInfo.add(mUserGit);
-        mUserInfo.add(mUserAbout);
+        mUserInfoViews = new ArrayList<>();
+        mUserInfoViews.add(mUserPhone);
+        mUserInfoViews.add(mUserEmail);
+        mUserInfoViews.add(mUserVk);
+        mUserInfoViews.add(mUserGit);
+        mUserInfoViews.add(mUserAbout);
 
         mFloatingActionButton.setOnClickListener(this);
 
         setupToolbar();
         setupDrawer();
+        loadUserInfoValue();
 
         if (savedInstanceState == null) {
             showSnackbar("Запущено впервые");
@@ -178,7 +191,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void changeViewMode(int mode) {
         if (mode == 1) {
-            for (EditText userValue : mUserInfo) {
+            for (EditText userValue : mUserInfoViews) {
                 userValue.setEnabled(true);
                 userValue.setFocusable(true);
                 userValue.setFocusableInTouchMode(true);
@@ -186,12 +199,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             mFloatingActionButton.setImageResource(R.drawable.ic_done_24dp);
         } else {
-            for (EditText userValue : mUserInfo) {
+            for (EditText userValue : mUserInfoViews) {
                 userValue.setEnabled(false);
                 userValue.setFocusable(false);
                 userValue.setFocusableInTouchMode(false);
             }
 
+            saveUserInfoValue();
             mFloatingActionButton.setImageResource(R.drawable.ic_edit_24dp);
         }
 
@@ -199,10 +213,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     private void loadUserInfoValue() {
+        List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
 
+        for (int i = 0; i < userData.size(); i++) {
+            mUserInfoViews.get(i).setText(userData.get(i));
+        }
     }
 
     private void saveUserInfoValue() {
+        List<String> userData = new ArrayList<>();
 
+        for (EditText userFiledView : mUserInfoViews) {
+            userData.add(userFiledView.getText().toString());
+        }
+
+        mDataManager.getPreferencesManager().saveUserProfileData(userData);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isNavDrawerOpen()) {
+            mNavigationDrawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private boolean isNavDrawerOpen() {
+        return mNavigationDrawer != null && mNavigationDrawer.isDrawerOpen(GravityCompat.START);
     }
 }

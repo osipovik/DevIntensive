@@ -8,11 +8,11 @@
     android:paddingBottom="@dimen/spacing_small_8"
     android:background="@drawable/drawer_header_bg">
 
-    <ImageView
+    <com.softdesign.devintensive.ui.custom.CircleImageView
+        android:id="@+id/nav_photo_circle"
         android:layout_width="@dimen/size_avatar_60"
         android:layout_height="@dimen/size_avatar_60"
-        android:layout_marginTop="@dimen/spacing_normal_16"
-        android:background="@color/color_accent"/>
+        android:layout_marginTop="@dimen/spacing_normal_16"/>
 
     <LinearLayout
         android:layout_width="match_parent"
