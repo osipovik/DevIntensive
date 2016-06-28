@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="172dp"
+    android:paddingTop="@dimen/spacing_medial_24"
+    android:paddingLeft="@dimen/spacing_normal_16"
+    android:paddingRight="@dimen/spacing_normal_16"
+    android:paddingBottom="@dimen/spacing_small_8"
+    android:background="@drawable/drawer_header_bg">
+
+    <ImageView
+        android:layout_width="@dimen/size_avatar_60"
+        android:layout_height="@dimen/size_avatar_60"
+        android:layout_marginTop="@dimen/spacing_normal_16"
+        android:background="@color/color_accent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_medium_56"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_alignParentBottom="true">
+
+        <TextView
+            android:id="@+id/user_name_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Иван Осипов"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <TextView
+            android:id="@+id/user_email_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="osipovik89@gmail.com"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif" />
+
+    </LinearLayout>
+
+</RelativeLayout>
