@@ -22,4 +22,5 @@ public class ConstantManager {
     public static final int REQUEST_GALLERY_PICTURE = 88;
     public static final int PERMISSION_REQUEST_SETTINGS_CODE = 101;
     public static final int PERMISSION_REQUEST_CAMERA_CODE = 102;
+    public static final int PERMISSION_REQUEST_CALL_CODE = 103;
 }

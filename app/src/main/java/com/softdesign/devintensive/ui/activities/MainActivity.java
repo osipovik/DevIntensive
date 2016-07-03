@@ -3,6 +3,7 @@ package com.softdesign.devintensive.ui.activities;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,6 +30,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -46,65 +48,99 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.BindViews;
+import butterknife.ButterKnife;
+
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
     private final String TAG = ConstantManager.TAG_PREFIX  + getClass().getSimpleName();
 
-    private CoordinatorLayout mCoordinatorLayout;
-    private Toolbar mToolbar;
-    private DrawerLayout mNavigationDrawer;
-    private FloatingActionButton mFloatingActionButton;
-    private RelativeLayout mProfilePlaceholder;
-    private CollapsingToolbarLayout mCollapsingToolbar;
-    private AppBarLayout mAppBarLayout;
-    private ImageView mProfileImage;
+    @BindView(R.id.main_coordinator_layout)
+    CoordinatorLayout mCoordinatorLayout;
+
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
+    @BindView(R.id.navigation_drawer)
+    DrawerLayout mNavigationDrawer;
+
+    @BindView(R.id.fab)
+    FloatingActionButton mFloatingActionButton;
+
+    @BindView(R.id.profile_placeholder)
+    RelativeLayout mProfilePlaceholder;
+
+    @BindView(R.id.collapsing_toolbar)
+    CollapsingToolbarLayout mCollapsingToolbar;
+
+    @BindView(R.id.appbar_layout)
+    AppBarLayout mAppBarLayout;
+
+    @BindView(R.id.user_photo_img)
+    ImageView mProfileImage;
+
+    @BindViews({R.id.phone_et, R.id.email_et, R.id.vk_id_et, R.id.repository_et, R.id.about_et})
+    List<EditText> mUserInfoViews;
+
+    @BindViews({R.id.dial_iv, R.id.send_iv, R.id.view_vk_iv, R.id.view_github_iv})
+    List<ImageView> mImageViewList;
 
     private DataManager mDataManager;
-
-    private EditText mUserPhone, mUserEmail, mUserVk, mUserGit, mUserAbout;
-    private List<EditText> mUserInfoViews;
-
     private int mCurrentEditMode = 0;
 
     private AppBarLayout.LayoutParams mAppBarParams = null;
     private File mPhotoFile = null;
     private Uri mSelectedImage = null;
 
+    //Меняем состояние EditText(редактирование/просмотр) в зависимости от параметра value
+    ButterKnife.Setter<View, Boolean> setEditTextValues = new ButterKnife.Setter<View, Boolean>() {
+        @Override
+        public void set(@NonNull View view, Boolean value, int index) {
+            view.setEnabled(value);
+            view.setFocusable(value);
+            view.setFocusableInTouchMode(value);
+
+            if (view.getId() == R.id.phone_et) {
+                view.requestFocus();
+                InputMethodManager inputMethodManager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+            }
+        }
+    };
+
+    //Запрещаем клик по ImageView в режиме редактирования, и разрешаем в режиме просмотра
+    ButterKnife.Setter<View, Boolean> setImageViewClickable =
+            new ButterKnife.Setter<View, Boolean>() {
+        @Override
+        public void set(@NonNull View view, Boolean value, int index) {
+            view.setClickable(value);
+        }
+    };
+
+    //Устанавливаем обработку клика по элементам ImageView
+    ButterKnife.Action<ImageView> setOnClickListeners = new ButterKnife.Action<ImageView>() {
+        @Override
+        public void apply(@NonNull ImageView view, int index) {
+            view.setOnClickListener(MainActivity.this);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDataManager = DataManager.getInstance();
+        ButterKnife.bind(this);
+        ButterKnife.apply(mImageViewList, setOnClickListeners);
 
-        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mNavigationDrawer = (DrawerLayout) findViewById(R.id.navigation_drawer);
-        mFloatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
-        mProfilePlaceholder = (RelativeLayout) findViewById(R.id.profile_placeholder);
-        mCollapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-        mProfileImage = (ImageView) findViewById(R.id.user_photo_img);
+        mDataManager = DataManager.getInstance();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
         CircleImageView circlePhoto = (CircleImageView) navigationView.getHeaderView(0)
                 .findViewById(R.id.nav_photo_circle);
         circlePhoto.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.photo_120));
-
-
-        //TODO Использовать для инициализации ButterKnife
-        mUserPhone = (EditText) findViewById(R.id.phone_et);
-        mUserEmail = (EditText) findViewById(R.id.email_et);
-        mUserVk = (EditText) findViewById(R.id.vk_id_et);
-        mUserGit = (EditText) findViewById(R.id.repository_et);
-        mUserAbout = (EditText) findViewById(R.id.about_et);
-
-        mUserInfoViews = new ArrayList<>();
-        mUserInfoViews.add(mUserPhone);
-        mUserInfoViews.add(mUserEmail);
-        mUserInfoViews.add(mUserVk);
-        mUserInfoViews.add(mUserGit);
-        mUserInfoViews.add(mUserAbout);
 
         mFloatingActionButton.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
@@ -173,12 +209,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == ConstantManager.PERMISSION_REQUEST_CAMERA_CODE
                 && grantResults.length == 2) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // TODO: 02.07.16 Обработать разрешение на работу с камерой 1:33:00
-            }
-
-            if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                // TODO: 02.07.16 Обработать разрешение на работу с камерой 1:33:00
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                loadPhotoFromCamera();
             }
         }
     }
@@ -228,7 +261,58 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.profile_placeholder:
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
                 break;
+            case R.id.dial_iv:
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    String telNumber = mUserInfoViews.get(0).getText().toString();
+                    createActionIntent(Intent.ACTION_CALL, Uri.fromParts("tel", telNumber, null));
+                } else {
+                    requestAppPermissions(new String[]{
+                            Manifest.permission.CALL_PHONE
+                    }, ConstantManager.PERMISSION_REQUEST_CALL_CODE);
+                }
+                break;
+            case R.id.send_iv:
+                String email = mUserInfoViews.get(1).getText().toString();
+                createActionIntent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null));
+                break;
+            case R.id.view_vk_iv:
+                String vk_url = mUserInfoViews.get(2).getText().toString();
+                createActionIntent(Intent.ACTION_VIEW, Uri.parse("https://" + vk_url));
+                break;
+            case R.id.view_github_iv:
+                String repo_url = mUserInfoViews.get(3).getText().toString();
+                createActionIntent(Intent.ACTION_VIEW, Uri.parse("https://" + repo_url));
+                break;
         }
+    }
+
+    /**
+     * Показывает диалог запроса разрешений и списка permissions
+     * @param permissions Перечень необходимых разрешений
+     * @param requestCode Код запроса, для обработки возвращаемого результата
+     */
+    private void requestAppPermissions(String[] permissions, int requestCode) {
+        ActivityCompat.requestPermissions(this, permissions, requestCode);
+
+        Snackbar.make(mCoordinatorLayout, R.string.permission_request, Snackbar.LENGTH_LONG)
+                .setAction(R.string.allow, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openApplicationSettings();
+                    }
+                }).show();
+    }
+
+
+    /**
+     * Генерирует неявный интент по входящим параметрам и запускает новую активность
+     * @param action
+     * @param uri
+     */
+    private void createActionIntent(String action, Uri uri) {
+        Intent actionIntent = new Intent(action, uri);
+        startActivity(actionIntent);
     }
 
     @Override
@@ -303,9 +387,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
 
                 break;
-            case ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE:
-                // TODO: 02.07.16 ОБработать возврат из настроек разрешений приложения
-                break;
         }
     }
 
@@ -315,11 +396,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void changeViewMode(int mode) {
         if (mode == 1) {
-            for (EditText userValue : mUserInfoViews) {
-                userValue.setEnabled(true);
-                userValue.setFocusable(true);
-                userValue.setFocusableInTouchMode(true);
-            }
+            ButterKnife.apply(mUserInfoViews, setEditTextValues, true);
+            ButterKnife.apply(mImageViewList, setImageViewClickable, false);
 
             showProfilePlaceholder();
             lockToolbar();
@@ -327,11 +405,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFloatingActionButton.setImageResource(R.drawable.ic_done_24dp);
         } else {
-            for (EditText userValue : mUserInfoViews) {
-                userValue.setEnabled(false);
-                userValue.setFocusable(false);
-                userValue.setFocusableInTouchMode(false);
-            }
+            ButterKnife.apply(mUserInfoViews, setEditTextValues, false);
+            ButterKnife.apply(mImageViewList, setImageViewClickable, true);
 
             saveUserInfoValue();
             hideProfilePlaceholder();
@@ -387,7 +462,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 mPhotoFile = createImageFile();
             } catch (IOException e) {
                 e.printStackTrace();
-                // TODO: 29.06.16 обработать ошибку создания файла
+                // TODO: 03.07.16 Проверить сообщение
+                showSnackbar(getString(R.string.image_create_error) + e.getLocalizedMessage());
             }
 
             if (mPhotoFile != null) {
@@ -395,18 +471,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 startActivityForResult(takeCaptureIntent, ConstantManager.REQUEST_CAMERA_PICTURE);
             }
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{
+            requestAppPermissions(new String[]{
                     Manifest.permission.CAMERA,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             }, ConstantManager.PERMISSION_REQUEST_CAMERA_CODE);
-
-            Snackbar.make(mCoordinatorLayout, R.string.permission_request, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.allow, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            openApplicationSettings();
-                        }
-                    }).show();
         }
     }
 
@@ -449,11 +517,43 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         return image;
     }
 
+    /**
+     * Обновляет изображение профиля во вьюхе.
+     * Если вызван не из onCreate, сохраняет путь к изображению в Shared Preference
+     * @param selectedImage ресурс изображения
+     * @param init флаг вызова функции, true - при первом вызове из onCreate, иначе false
+     */
     private void insertProfileImage(Uri selectedImage, boolean init) {
         // TODO: 03.07.16 сделать palceholder и transorfm + crop
         Picasso.with(this)
                 .load(selectedImage)
-                .placeholder(R.drawable.photo_768x512)
+                .placeholder(R.drawable.user_bg)
+//                .transform(new Transformation() {
+//                    int maxHeight = 256;
+//
+//                    @Override
+//                    public Bitmap transform(Bitmap source) {
+//                        int targetWidth, targetHeight;
+//                        double aspectRatio;
+//
+//                        targetHeight = maxHeight;
+//                        aspectRatio = (double) source.getWidth() / (double) source.getHeight();
+//                        targetWidth = (int) (targetHeight * aspectRatio);
+//
+//                        Bitmap result = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false);
+//
+//                        if (result != source) {
+//                            source.recycle();
+//                        }
+//
+//                        return result;
+//                    }
+//
+//                    @Override
+//                    public String key() {
+//                        return "x" + maxHeight;
+//                    }
+//                })
                 .into(mProfileImage);
 
         if (!init) {
@@ -464,6 +564,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private void openApplicationSettings() {
         Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getPackageName()));
+        // TODO: 03.07.16 ACTION_APPLICATION_DETAILS_SETTINGS не дает результата, зечем startActivityForResult
         startActivityForResult(appSettingsIntent, ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE);
     }
 }

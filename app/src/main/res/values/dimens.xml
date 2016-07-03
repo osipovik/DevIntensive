@@ -28,6 +28,6 @@
     <dimen name="height_line">72dp</dimen>
     <dimen name="size_avatar_60">60dp</dimen>
     <dimen name="fab_right_space">16dp</dimen>
-    <dimen name="profile_image_height">280dp</dimen>
+    <dimen name="profile_image_height">256dp</dimen>
     <dimen name="placeholder_photo_size_90">90dp</dimen>
 </resources>

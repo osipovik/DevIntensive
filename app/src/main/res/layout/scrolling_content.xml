@@ -110,6 +110,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/dial_iv"
                 style="@style/icon.right"
                 android:src="@drawable/ic_phone_in_talk_24dp"/>
 
@@ -162,6 +163,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/send_iv"
                 style="@style/icon.right"
                 android:src="@drawable/ic_send_24dp"/>
 
@@ -214,6 +216,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/view_vk_iv"
                 style="@style/icon.right"
                 android:src="@drawable/ic_visibility_24dp"/>
 
@@ -266,6 +269,7 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/view_github_iv"
                 style="@style/icon.right"
                 android:src="@drawable/ic_visibility_24dp"/>
 
