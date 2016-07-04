@@ -26,4 +26,6 @@
 
     <dimen name="line_size">1dp</dimen>
     <dimen name="height_line">72dp</dimen>
+    <dimen name="size_avatar_60">60dp</dimen>
+    <dimen name="fab_right_space">16dp</dimen>
 </resources>

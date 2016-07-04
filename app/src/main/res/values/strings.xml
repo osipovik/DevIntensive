@@ -21,4 +21,6 @@
         годах и, в более недавнее время, программы
         электронной вёрстки типа Aldus PageMaker,
         в шаблонах которых используется Lorem Ipsum.</string>
+    <string name="my_profile">Мой профиль</string>
+    <string name="team">Команда</string>
 </resources>
