@@ -32,4 +32,11 @@
     <string name="permission_request">Для корректной работы необходимо дать приложению требуемые разрешения</string>
     <string name="allow">Разешить</string>
     <string name="image_create_error">Не удалось создать файл изображения</string>
+    <string name="app_for_action_not_fount_exception">Не найдено приложение для выполнения этого действия</string>
+    <string name="login">ВОЙТИ</string>
+    <string name="login_text">ВОЙТИ</string>
+    <string name="email_user">osipovik89@gmail.com</string>
+    <string name="password_text">Пароль</string>
+    <string name="get_password">Забыли пароль?</string>
+    <string name="email_hint_text">Email</string>
 </resources>

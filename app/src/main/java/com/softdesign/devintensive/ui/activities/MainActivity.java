@@ -2,12 +2,15 @@ package com.softdesign.devintensive.ui.activities;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,6 +25,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -40,8 +44,10 @@ import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.ui.custom.CircleImageView;
 import com.softdesign.devintensive.utils.ConstantManager;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,11 +143,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
         mDataManager = DataManager.getInstance();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        CircleImageView circlePhoto = (CircleImageView) navigationView.getHeaderView(0)
-                .findViewById(R.id.nav_photo_circle);
-        circlePhoto.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.photo_120));
-
         mFloatingActionButton.setOnClickListener(this);
         mProfilePlaceholder.setOnClickListener(this);
 
@@ -220,6 +221,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
+    /**
+     * Устанавливает тулбар, получает параметры CollapsingToolbar, устанавливает параметры ActionBar
+     */
     private void setupToolbar() {
         setSupportActionBar(mToolbar);
 
@@ -232,24 +236,31 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
+
+    /**
+     * Устанавливает обоработчик клика по элементам списка в NavigationView
+     */
     private void setupDrawer() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
 
-        navigationView.setNavigationItemSelectedListener(new NavigationView
-                .OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                showSnackbar(item.getTitle().toString());
-                item.setChecked(true);
-                mNavigationDrawer.closeDrawer(GravityCompat.START);
-                return false;
-            }
-        });
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(new NavigationView
+                    .OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem item) {
+                    showSnackbar(item.getTitle().toString());
+                    item.setChecked(true);
+                    mNavigationDrawer.closeDrawer(GravityCompat.START);
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            //Клик по кнопке FloatActionButton
             case R.id.fab:
                 if (mCurrentEditMode == 0) {
                     changeViewMode(1);
@@ -258,9 +269,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 }
 
                 break;
+            //Клик по плейсхолдеру для установки фотографии профиля
             case R.id.profile_placeholder:
                 showDialog(ConstantManager.LOAD_PROFILE_PHOTO);
                 break;
+            //Клик по иконке вызова
             case R.id.dial_iv:
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                         == PackageManager.PERMISSION_GRANTED) {
@@ -272,14 +285,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     }, ConstantManager.PERMISSION_REQUEST_CALL_CODE);
                 }
                 break;
+            //Клик по иконке отправки email
             case R.id.send_iv:
                 String email = mUserInfoViews.get(1).getText().toString();
                 createActionIntent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null));
                 break;
+            //Клик по иконке просмотра профиля ВК
             case R.id.view_vk_iv:
                 String vk_url = mUserInfoViews.get(2).getText().toString();
                 createActionIntent(Intent.ACTION_VIEW, Uri.parse("https://" + vk_url));
                 break;
+            //Клик по иконке просмотра аккаунта GitHub
             case R.id.view_github_iv:
                 String repo_url = mUserInfoViews.get(3).getText().toString();
                 createActionIntent(Intent.ACTION_VIEW, Uri.parse("https://" + repo_url));
@@ -307,12 +323,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     /**
      * Генерирует неявный интент по входящим параметрам и запускает новую активность
-     * @param action
-     * @param uri
+     * @param action Строковое представление действия для интента
+     * @param uri Подготовленный к передаче в интент Uri
      */
     private void createActionIntent(String action, Uri uri) {
         Intent actionIntent = new Intent(action, uri);
-        startActivity(actionIntent);
+
+        try {
+            startActivity(actionIntent);
+        } catch (ActivityNotFoundException e) {
+            showSnackbar(getString(R.string.app_for_action_not_fount_exception));
+        }
     }
 
     @Override
@@ -462,7 +483,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 mPhotoFile = createImageFile();
             } catch (IOException e) {
                 e.printStackTrace();
-                // TODO: 03.07.16 Проверить сообщение
                 showSnackbar(getString(R.string.image_create_error) + e.getLocalizedMessage());
             }
 
@@ -524,47 +544,60 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * @param init флаг вызова функции, true - при первом вызове из onCreate, иначе false
      */
     private void insertProfileImage(Uri selectedImage, boolean init) {
-        // TODO: 03.07.16 сделать palceholder и transorfm + crop
         Picasso.with(this)
                 .load(selectedImage)
                 .placeholder(R.drawable.user_bg)
-//                .transform(new Transformation() {
-//                    int maxHeight = 256;
-//
-//                    @Override
-//                    public Bitmap transform(Bitmap source) {
-//                        int targetWidth, targetHeight;
-//                        double aspectRatio;
-//
-//                        targetHeight = maxHeight;
-//                        aspectRatio = (double) source.getWidth() / (double) source.getHeight();
-//                        targetWidth = (int) (targetHeight * aspectRatio);
-//
-//                        Bitmap result = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false);
-//
-//                        if (result != source) {
-//                            source.recycle();
-//                        }
-//
-//                        return result;
-//                    }
-//
-//                    @Override
-//                    public String key() {
-//                        return "x" + maxHeight;
-//                    }
-//                })
+                .transform(new Transformation() {
+                    int maxHeight = 256;
+
+                    @Override
+                    public Bitmap transform(Bitmap source) {
+                        int targetWidth, targetHeight;
+                        double aspectRatio;
+
+                        targetHeight = maxHeight;
+                        aspectRatio = (double) source.getWidth() / (double) source.getHeight();
+                        targetWidth = (int) (targetHeight * aspectRatio);
+
+                        Bitmap result = Bitmap.createScaledBitmap(source, targetWidth, targetHeight, false);
+
+                        if (result != source) {
+                            source.recycle();
+                        }
+
+                        return result;
+                    }
+
+                    @Override
+                    public String key() {
+                        return "x" + maxHeight;
+                    }
+                })
                 .into(mProfileImage);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        CircleImageView circlePhoto = (CircleImageView) navigationView.getHeaderView(0)
+                .findViewById(R.id.nav_photo_circle);
+
+        try {
+            circlePhoto.setImageDrawable(Drawable.createFromStream(
+                    getContentResolver().openInputStream(selectedImage), selectedImage.toString()));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         if (!init) {
             mDataManager.getPreferencesManager().saveUserPhoto(selectedImage);
         }
     }
 
+    /**
+     * Открывает настройки приложения, вызываем для установки прав
+     */
     private void openApplicationSettings() {
         Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getPackageName()));
-        // TODO: 03.07.16 ACTION_APPLICATION_DETAILS_SETTINGS не дает результата, зечем startActivityForResult
-        startActivityForResult(appSettingsIntent, ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE);
+
+        startActivity(appSettingsIntent);
     }
 }
