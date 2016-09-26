@@ -138,6 +138,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent authIntent = new Intent(this, AuthActivity.class);
+        startActivity(authIntent);
+
         ButterKnife.bind(this);
         ButterKnife.apply(mImageViewList, setOnClickListeners);
 
