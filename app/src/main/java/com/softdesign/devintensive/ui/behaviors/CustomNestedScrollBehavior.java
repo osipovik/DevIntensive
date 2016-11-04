@@ -36,11 +36,6 @@ public class CustomNestedScrollBehavior extends AppBarLayout.ScrollingViewBehavi
                 mMinAppBarHeight, mMaxAppBarHeight, dependency.getBottom());
         int transY = UiHelper.lerp(mMaxUserInfoHeight/2, mMaxUserInfoHeight, currentFriction);
 
-//        Log.d(TAG, "mMaxUserInfoHeight/2 = " + mMaxUserInfoHeight/2);
-//        Log.d(TAG, "mMaxUserInfoHeight = " + mMaxUserInfoHeight);
-//        Log.d(TAG, "currentFriction = " + currentFriction);
-//        Log.d(TAG, "transY = " + transY);
-
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
         lp.topMargin = transY;
         child.setLayoutParams(lp);
