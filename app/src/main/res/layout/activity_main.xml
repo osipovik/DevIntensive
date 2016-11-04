@@ -29,8 +29,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-                app:expandedTitleMarginStart="48dp"
-                app:expandedTitleMarginEnd="64dp"
                 app:contentScrim="?attr/colorPrimary">
 
                 <FrameLayout
@@ -88,6 +86,63 @@
             </android.support.design.widget.CollapsingToolbarLayout>
 
         </android.support.design.widget.AppBarLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/user_info_height"
+            android:background="@color/grey"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:fitsSystemWindows="true"
+            app:layout_behavior=".ui.behaviors.UserInfoBehavior"
+            app:behavior_min_height="56dp">
+
+            <LinearLayout
+                style="@style/container">
+
+                <TextView
+                    style="@style/text.title"
+                    android:text="5"/>
+
+                <TextView
+                    style="@style/text"
+                    android:text="Рейтинг"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="@dimen/line_size"
+                android:layout_height="@dimen/height_line"
+                android:background="@color/grey_light"/>
+
+            <LinearLayout
+                style="@style/container">
+
+                <TextView
+                    style="@style/text.title"
+                    android:text="2500"/>
+
+                <TextView
+                    style="@style/text"
+                    android:text="Строчек кода"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="@dimen/line_size"
+                android:layout_height="@dimen/height_line"
+                android:background="@color/grey_light"/>
+
+            <LinearLayout
+                style="@style/container">
+
+                <TextView
+                    style="@style/text.title"
+                    android:text="5"/>
+
+                <TextView
+                    style="@style/text"
+                    android:text="Проектов"/>
+            </LinearLayout>
+        </LinearLayout>
 
         <include layout="@layout/scrolling_content" />
         
