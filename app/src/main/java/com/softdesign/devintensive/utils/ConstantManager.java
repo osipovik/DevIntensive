@@ -17,6 +17,10 @@ public class ConstantManager {
     public static final String USER_ABOUT_KEY = "USER_ABOUT";
     public static final String USER_PHOTO_KEY = "USER_PHOTO";
 
+    public static final String USER_RATING_VALUE_KEY = "USER_RATING_VALUE";
+    public static final String USER_CODE_LINES_KEY = "USER_CODE_LINES";
+    public static final String USER_PROJECTS_KEY = "USER_PROJECTS";
+
     public static final String AUTH_TOKEN_KEY = "AUTH_TOKEN";
     public static final String USER_ID_KEY = "USER_ID";
 

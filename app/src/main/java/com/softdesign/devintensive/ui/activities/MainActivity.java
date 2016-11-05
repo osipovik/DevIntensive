@@ -25,7 +25,6 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -38,6 +37,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
@@ -87,10 +87,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     ImageView mProfileImage;
 
     @BindViews({R.id.phone_et, R.id.email_et, R.id.vk_id_et, R.id.repository_et, R.id.about_et})
-    List<EditText> mUserInfoViews;
+    List<EditText> mUserFieldViews;
 
     @BindViews({R.id.dial_iv, R.id.send_iv, R.id.view_vk_iv, R.id.view_github_iv})
     List<ImageView> mImageViewList;
+
+    @BindViews({R.id.user_rating_tv, R.id.user_code_lines_tv, R.id.user_projects_tv})
+    List<TextView> mUserValueViews;
 
     private DataManager mDataManager;
     private int mCurrentEditMode = 0;
@@ -138,9 +141,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent authIntent = new Intent(this, AuthActivity.class);
-        startActivity(authIntent);
-
         ButterKnife.bind(this);
         ButterKnife.apply(mImageViewList, setOnClickListeners);
 
@@ -152,13 +152,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setupToolbar();
         setupDrawer();
         insertProfileImage(mDataManager.getPreferencesManager().loadUserPhoto(), true);
+        initUserField();
+        initUserInfoValue();
 
         if (savedInstanceState == null) {
 
         } else {
             mCurrentEditMode = savedInstanceState.getInt(ConstantManager.EDIT_MODE_KEY, 0);
             changeViewMode(mCurrentEditMode);
-            loadUserInfoValue();
         }
 
         Log.d(TAG, "onCreate()");
@@ -280,7 +281,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             case R.id.dial_iv:
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                         == PackageManager.PERMISSION_GRANTED) {
-                    String telNumber = mUserInfoViews.get(0).getText().toString();
+                    String telNumber = mUserFieldViews.get(0).getText().toString();
                     createActionIntent(Intent.ACTION_CALL, Uri.fromParts("tel", telNumber, null));
                 } else {
                     requestAppPermissions(new String[]{
@@ -290,17 +291,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
             //Клик по иконке отправки email
             case R.id.send_iv:
-                String email = mUserInfoViews.get(1).getText().toString();
+                String email = mUserFieldViews.get(1).getText().toString();
                 createActionIntent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", email, null));
                 break;
             //Клик по иконке просмотра профиля ВК
             case R.id.view_vk_iv:
-                String vk_url = mUserInfoViews.get(2).getText().toString();
+                String vk_url = mUserFieldViews.get(2).getText().toString();
                 createActionIntent(Intent.ACTION_VIEW, Uri.parse("https://" + vk_url));
                 break;
             //Клик по иконке просмотра аккаунта GitHub
             case R.id.view_github_iv:
-                String repo_url = mUserInfoViews.get(3).getText().toString();
+                String repo_url = mUserFieldViews.get(3).getText().toString();
                 createActionIntent(Intent.ACTION_VIEW, Uri.parse("https://" + repo_url));
                 break;
         }
@@ -420,7 +421,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void changeViewMode(int mode) {
         if (mode == 1) {
-            ButterKnife.apply(mUserInfoViews, setEditTextValues, true);
+            ButterKnife.apply(mUserFieldViews, setEditTextValues, true);
             ButterKnife.apply(mImageViewList, setImageViewClickable, false);
 
             showProfilePlaceholder();
@@ -429,10 +430,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             mCollapsingToolbar.setExpandedTitleColor(Color.TRANSPARENT);
             mFloatingActionButton.setImageResource(R.drawable.ic_done_24dp);
         } else {
-            ButterKnife.apply(mUserInfoViews, setEditTextValues, false);
+            ButterKnife.apply(mUserFieldViews, setEditTextValues, false);
             ButterKnife.apply(mImageViewList, setImageViewClickable, true);
 
-            saveUserInfoValue();
+            saveUserField();
             hideProfilePlaceholder();
             unlockToolbar();
 
@@ -443,22 +444,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mCurrentEditMode = mode;
     }
 
-    private void loadUserInfoValue() {
+    private void initUserField() {
         List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
 
         for (int i = 0; i < userData.size(); i++) {
-            mUserInfoViews.get(i).setText(userData.get(i));
+            mUserFieldViews.get(i).setText(userData.get(i));
         }
     }
 
-    private void saveUserInfoValue() {
+    private void saveUserField() {
         List<String> userData = new ArrayList<>();
 
-        for (EditText userFiledView : mUserInfoViews) {
+        for (EditText userFiledView : mUserFieldViews) {
             userData.add(userFiledView.getText().toString());
         }
 
         mDataManager.getPreferencesManager().saveUserProfileData(userData);
+    }
+
+    private void initUserInfoValue() {
+        List<String> userValues = mDataManager.getPreferencesManager().loadUserProfileValues();
+
+        for (int i = 0; i < userValues.size(); i++) {
+            mUserValueViews.get(i).setText(userValues.get(i));
+        }
     }
 
     private boolean isNavDrawerOpen() {

@@ -23,6 +23,12 @@ public class PreferencesManager {
             ConstantManager.USER_ABOUT_KEY
     };
 
+    private static final String[] USER_VALUES = {
+            ConstantManager.USER_RATING_VALUE_KEY,
+            ConstantManager.USER_CODE_LINES_KEY,
+            ConstantManager.USER_PROJECTS_KEY
+    };
+
     public PreferencesManager() {
         this.mSharedPreferences = DevintensiveApplication.getSharedPreferences();
     }
@@ -45,6 +51,26 @@ public class PreferencesManager {
         }
 
         return userFields;
+    }
+
+    public void saveUserProfileValues(int[] userValues) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+
+        for (int i = 0; i < USER_VALUES.length; i++) {
+            editor.putString(USER_VALUES[i], String.valueOf(userValues[i]));
+        }
+
+        editor.apply();
+    }
+
+    public List<String> loadUserProfileValues() {
+        List<String> userValues = new ArrayList<>();
+
+        for (int i = 0; i < USER_VALUES.length; i++) {
+            userValues.add(mSharedPreferences.getString(USER_VALUES[i], "0"));
+        }
+
+        return userValues;
     }
 
     public void saveUserPhoto(Uri uri) {

@@ -15,6 +15,7 @@
         style="@style/container">
 
         <TextView
+            android:id="@+id/user_rating_tv"
             style="@style/text.title"
             android:text="5"/>
 
@@ -32,6 +33,7 @@
         style="@style/container">
 
         <TextView
+            android:id="@+id/user_code_lines_tv"
             style="@style/text.title"
             android:text="2500"/>
 
@@ -49,6 +51,7 @@
         style="@style/container">
 
         <TextView
+            android:id="@+id/user_projects_tv"
             style="@style/text.title"
             android:text="5"/>
 
