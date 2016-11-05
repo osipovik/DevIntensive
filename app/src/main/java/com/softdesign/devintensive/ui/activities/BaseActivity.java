@@ -3,6 +3,7 @@ package com.softdesign.devintensive.ui.activities;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -41,6 +42,10 @@ public class BaseActivity extends AppCompatActivity {
     public void showError(String message, Exception e) {
         showToast(message);
         Log.e(TAG, String.valueOf(e));
+    }
+
+    public void showSnackbar(CoordinatorLayout coordinatorLayout,String message) {
+        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
     public void showToast(String message) {
