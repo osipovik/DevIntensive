@@ -10,6 +10,7 @@ public class ConstantManager {
     public static final String TAG_PREFIX = "DEV ";
     public static final String EDIT_MODE_KEY = "EDIT_MODE";
 
+    public static final String USER_NAME_KEY = "USER_NAME";
     public static final String USER_PHONE_KEY = "USER_PHONE";
     public static final String USER_EMAIL_KEY = "USER_EMAIL";
     public static final String USER_VK_KEY = "USER_VK";

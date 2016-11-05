@@ -22,23 +22,6 @@ public class UserModelResponse {
         return data;
     }
 
-    public class Contacts {
-
-        @SerializedName("vk")
-        @Expose
-        private String vk;
-        @SerializedName("phone")
-        @Expose
-        private String phone;
-        @SerializedName("email")
-        @Expose
-        private String email;
-        @SerializedName("updated")
-        @Expose
-        private String updated;
-
-    }
-
     public class Data {
 
         @SerializedName("user")
@@ -55,85 +38,6 @@ public class UserModelResponse {
         public User getUser() {
             return user;
         }
-    }
-
-    public class ProfileValues {
-
-        @SerializedName("homeTask")
-        @Expose
-        private int homeTask;
-        @SerializedName("projects")
-        @Expose
-        private int projects;
-        @SerializedName("linesCode")
-        @Expose
-        private int linesCode;
-        @SerializedName("likesBy")
-        @Expose
-        private List<Object> likesBy = new ArrayList<Object>();
-        @SerializedName("rait")
-        @Expose
-        private int rait;
-        @SerializedName("updated")
-        @Expose
-        private String updated;
-        @SerializedName("rating")
-        @Expose
-        private int rating;
-
-        public int getProjects() {
-            return projects;
-        }
-
-        public int getLinesCode() {
-            return linesCode;
-        }
-
-        public int getRaiting() {
-            return rait;
-        }
-    }
-
-    public class PublicInfo {
-
-        @SerializedName("bio")
-        @Expose
-        private String bio;
-        @SerializedName("avatar")
-        @Expose
-        private String avatar;
-        @SerializedName("photo")
-        @Expose
-        private String photo;
-        @SerializedName("updated")
-        @Expose
-        private String updated;
-
-    }
-
-    public class Repo {
-
-        @SerializedName("_id")
-        @Expose
-        private String id;
-        @SerializedName("git")
-        @Expose
-        private String git;
-        @SerializedName("title")
-        @Expose
-        private String title;
-
-    }
-
-    public class Repositories {
-
-        @SerializedName("repo")
-        @Expose
-        private List<Repo> repo = new ArrayList<Repo>();
-        @SerializedName("updated")
-        @Expose
-        private String updated;
-
     }
 
     public class User {
@@ -178,6 +82,146 @@ public class UserModelResponse {
 
         public ProfileValues getProfileValues() {
             return profileValues;
+        }
+
+        public Repositories getRepositories() {
+            return repositories;
+        }
+
+        public PublicInfo getPublicInfo() {
+            return publicInfo;
+        }
+
+        public Contacts getContacts() {
+            return contacts;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public String getSecondName() {
+            return secondName;
+        }
+    }
+
+    public class Contacts {
+
+        @SerializedName("vk")
+        @Expose
+        private String vk;
+        @SerializedName("phone")
+        @Expose
+        private String phone;
+        @SerializedName("email")
+        @Expose
+        private String email;
+        @SerializedName("updated")
+        @Expose
+        private String updated;
+
+        public String getVk() {
+            return vk;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+    }
+
+    public class Repositories {
+
+        @SerializedName("repo")
+        @Expose
+        private List<Repo> repo = new ArrayList<Repo>();
+        @SerializedName("updated")
+        @Expose
+        private String updated;
+
+        public List<Repo> getRepo() {
+            return repo;
+        }
+    }
+
+    public class Repo {
+
+        @SerializedName("_id")
+        @Expose
+        private String id;
+        @SerializedName("git")
+        @Expose
+        private String git;
+        @SerializedName("title")
+        @Expose
+        private String title;
+
+        public String getGit() {
+            return git;
+        }
+    }
+
+    public class ProfileValues {
+
+        @SerializedName("homeTask")
+        @Expose
+        private int homeTask;
+        @SerializedName("projects")
+        @Expose
+        private int projects;
+        @SerializedName("linesCode")
+        @Expose
+        private int linesCode;
+        @SerializedName("likesBy")
+        @Expose
+        private List<Object> likesBy = new ArrayList<Object>();
+        @SerializedName("rait")
+        @Expose
+        private int rait;
+        @SerializedName("updated")
+        @Expose
+        private String updated;
+        @SerializedName("rating")
+        @Expose
+        private int rating;
+
+        public int getProjects() {
+            return projects;
+        }
+
+        public int getLinesCode() {
+            return linesCode;
+        }
+
+        public int getRating() {
+            return rait;
+        }
+    }
+
+    public class PublicInfo {
+
+        @SerializedName("bio")
+        @Expose
+        private String bio;
+        @SerializedName("avatar")
+        @Expose
+        private String avatar;
+        @SerializedName("photo")
+        @Expose
+        private String photo;
+        @SerializedName("updated")
+        @Expose
+        private String updated;
+
+        public String getBio() {
+            return bio;
+        }
+
+        public String getPhoto() {
+            return photo;
         }
     }
 }

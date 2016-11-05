@@ -26,7 +26,9 @@
 
     <View
         android:layout_width="@dimen/line_size"
-        android:layout_height="@dimen/height_line"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/spacing_normal_16"
+        android:layout_marginBottom="@dimen/spacing_normal_16"
         android:background="@color/grey_light"/>
 
     <LinearLayout
@@ -44,7 +46,9 @@
 
     <View
         android:layout_width="@dimen/line_size"
-        android:layout_height="@dimen/height_line"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/spacing_normal_16"
+        android:layout_marginBottom="@dimen/spacing_normal_16"
         android:background="@color/grey_light"/>
 
     <LinearLayout

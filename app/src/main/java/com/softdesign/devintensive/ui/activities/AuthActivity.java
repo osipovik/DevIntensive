@@ -17,6 +17,9 @@ import com.softdesign.devintensive.data.network.request.UserLoginRequest;
 import com.softdesign.devintensive.data.network.response.UserModelResponse;
 import com.softdesign.devintensive.utils.NetworkStatusChecker;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
@@ -95,7 +98,10 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener {
         showSnackbar(mCoordinatorLayout, userModel.getData().getToken());
         mDataManager.getPreferencesManager().saveAuthToken(userModel.getData().getToken());
         mDataManager.getPreferencesManager().saveUserId(userModel.getData().getUser().getId());
-        saveUserValues(userModel);
+        saveUserName(userModel.getData().getUser());
+        saveUserPhoto(userModel.getData().getUser().getPublicInfo());
+        saveUserValues(userModel.getData().getUser().getProfileValues());
+        saveUserFields(userModel.getData().getUser());
 
         Intent loginIntent = new Intent(this, MainActivity.class);
         startActivity(loginIntent);
@@ -132,13 +138,34 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener {
         });
     }
 
-    private void saveUserValues(UserModelResponse userModel) {
+    private void saveUserName(UserModelResponse.User user) {
+        mDataManager.getPreferencesManager()
+                .saveUserName(user.getFirstName() + " " + user.getSecondName());
+    }
+
+    private void saveUserPhoto(UserModelResponse.PublicInfo userPublicInfo) {
+        mDataManager.getPreferencesManager().saveUserPhoto(Uri.parse(userPublicInfo.getPhoto()));
+    }
+
+    private void saveUserValues(UserModelResponse.ProfileValues profileValues) {
         int[] userValues = {
-                userModel.getData().getUser().getProfileValues().getRaiting(),
-                userModel.getData().getUser().getProfileValues().getLinesCode(),
-                userModel.getData().getUser().getProfileValues().getProjects()
+                profileValues.getRating(),
+                profileValues.getLinesCode(),
+                profileValues.getProjects()
         };
 
         mDataManager.getPreferencesManager().saveUserProfileValues(userValues);
+    }
+
+    private void saveUserFields(UserModelResponse.User user) {
+        List<String> userFields = new ArrayList<String>();
+
+        userFields.add(user.getContacts().getPhone());
+        userFields.add(user.getContacts().getEmail());
+        userFields.add(user.getContacts().getVk());
+        userFields.add(user.getRepositories().getRepo().get(0).getGit());
+        userFields.add(user.getPublicInfo().getBio());
+
+        mDataManager.getPreferencesManager().saveUserProfileData(userFields);
     }
 }

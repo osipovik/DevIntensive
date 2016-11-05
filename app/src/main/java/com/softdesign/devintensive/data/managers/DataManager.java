@@ -1,10 +1,18 @@
 package com.softdesign.devintensive.data.managers;
 
+import android.net.Uri;
+
 import com.softdesign.devintensive.data.network.RestService;
 import com.softdesign.devintensive.data.network.ServiceGenerator;
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
 import com.softdesign.devintensive.data.network.response.UserModelResponse;
 
+import java.io.File;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 
 /**
@@ -37,6 +45,15 @@ public class DataManager {
 
     public Call<UserModelResponse> loginUser(UserLoginRequest userLoginRequest) {
         return mRestService.loginUser(userLoginRequest);
+    }
+
+    public Call<ResponseBody> uploadImage(Uri fileUri) {
+        File file = new File(fileUri.getPath());
+        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("picture", file.getName(), requestFile);
+
+        return mRestService.uploadImage(getPreferencesManager().getUserId(), body);
     }
 
     //endregion

@@ -43,6 +43,16 @@ public class PreferencesManager {
         editor.apply();
     }
 
+    public void saveUserName(String name) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(ConstantManager.USER_NAME_KEY, name);
+        editor.apply();
+    }
+
+    public String loadUserName() {
+        return mSharedPreferences.getString(ConstantManager.USER_NAME_KEY, "null");
+    }
+
     public List<String> loadUserProfileData() {
         List<String> userFields = new ArrayList<>();
 

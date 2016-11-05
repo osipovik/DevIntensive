@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,12 +44,18 @@ import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.ui.custom.CircleImageView;
 import com.softdesign.devintensive.utils.ConstantManager;
+import com.softdesign.devintensive.utils.FileUtils;
+import com.softdesign.devintensive.utils.NetworkStatusChecker;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,6 +64,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
@@ -152,6 +165,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         setupToolbar();
         setupDrawer();
         insertProfileImage(mDataManager.getPreferencesManager().loadUserPhoto(), true);
+        initUserName();
         initUserField();
         initUserInfoValue();
 
@@ -402,6 +416,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if (resultCode == RESULT_OK && data != null) {
                     mSelectedImage = data.getData();
                     insertProfileImage(mSelectedImage, false);
+                    uploadImage(Uri.parse(FileUtils.getPath(mSelectedImage)));
                 }
 
                 break;
@@ -409,10 +424,34 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 if (resultCode == RESULT_OK && mPhotoFile != null) {
                     mSelectedImage = Uri.fromFile(mPhotoFile);
                     insertProfileImage(mSelectedImage, false);
+                    uploadImage(Uri.parse(FileUtils.getPath(mSelectedImage)));
                 }
 
                 break;
         }
+    }
+
+    private void uploadImage(Uri fileUri) {
+        if (!NetworkStatusChecker.isNetworkAvailable(this)) {
+            showSnackbar("Network is not available, please try later.");
+            return;
+        }
+
+        Call<ResponseBody> call = mDataManager.uploadImage(fileUri);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                showSnackbar("Photo success upload!");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // TODO: 05.11.16 обработать ошибки
+                if (t instanceof SocketTimeoutException) {
+                    showSnackbar("Failed to upload photo to server. Network is not available.");
+                }
+            }
+        });
     }
 
     /**
@@ -444,11 +483,39 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mCurrentEditMode = mode;
     }
 
+    private void initUserName() {
+        String userName = mDataManager.getPreferencesManager().loadUserName();
+
+        mCollapsingToolbar.setTitle(userName);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        TextView drawerUserName =
+                (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_tv);
+        drawerUserName.setText(userName);
+    }
+
     private void initUserField() {
         List<String> userData = mDataManager.getPreferencesManager().loadUserProfileData();
 
         for (int i = 0; i < userData.size(); i++) {
-            mUserFieldViews.get(i).setText(userData.get(i));
+            EditText field = mUserFieldViews.get(i);
+
+            field.setText(userData.get(i));
+
+            if (field.getId() == R.id.email_et) {
+                NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+                TextView drawerUserEmail =
+                        (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_email_tv);
+                drawerUserEmail.setText(userData.get(i));
+            }
+        }
+    }
+
+    private void initUserInfoValue() {
+        List<String> userValues = mDataManager.getPreferencesManager().loadUserProfileValues();
+
+        for (int i = 0; i < userValues.size(); i++) {
+            mUserValueViews.get(i).setText(userValues.get(i));
         }
     }
 
@@ -460,14 +527,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
         mDataManager.getPreferencesManager().saveUserProfileData(userData);
-    }
-
-    private void initUserInfoValue() {
-        List<String> userValues = mDataManager.getPreferencesManager().loadUserProfileValues();
-
-        for (int i = 0; i < userValues.size(); i++) {
-            mUserValueViews.get(i).setText(userValues.get(i));
-        }
     }
 
     private boolean isNavDrawerOpen() {
@@ -556,6 +615,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      * @param init флаг вызова функции, true - при первом вызове из onCreate, иначе false
      */
     private void insertProfileImage(Uri selectedImage, boolean init) {
+        final Uri image = selectedImage;
+
         Picasso.with(this)
                 .load(selectedImage)
                 .placeholder(R.drawable.user_bg)
@@ -588,14 +649,32 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 .into(mProfileImage);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
-        CircleImageView circlePhoto = (CircleImageView) navigationView.getHeaderView(0)
+        final CircleImageView circlePhoto = (CircleImageView) navigationView.getHeaderView(0)
                 .findViewById(R.id.nav_photo_circle);
 
-        try {
-            circlePhoto.setImageDrawable(Drawable.createFromStream(
-                    getContentResolver().openInputStream(selectedImage), selectedImage.toString()));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        if (image.getScheme().equals("http") || image.getScheme().equals("https")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        HttpURLConnection connection = null;
+                        connection = (HttpURLConnection) new URL(image.toString()).openConnection();
+                        connection.connect();
+                        InputStream input = null;
+                        input = connection.getInputStream();
+                        circlePhoto.setImageDrawable(Drawable.createFromStream(input, image.toString()));
+                    } catch (IOException e) {
+
+                    }
+                }
+            }).start();
+        } else {
+            try {
+                circlePhoto.setImageDrawable(Drawable.createFromStream(
+                        getContentResolver().openInputStream(selectedImage), selectedImage.toString()));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         if (!init) {

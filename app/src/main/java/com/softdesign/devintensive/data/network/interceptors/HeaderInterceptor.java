@@ -1,7 +1,5 @@
 package com.softdesign.devintensive.data.network.interceptors;
 
-import android.preference.PreferenceManager;
-
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.managers.PreferencesManager;
 
