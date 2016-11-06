@@ -31,13 +31,20 @@
             android:name=".ui.activities.AuthActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".ui.activities.UserListActivity"
-                  android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name=".ui.activities.UserListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".ui.activities.ProfileUserActivity"
+                  android:theme="@style/AppTheme.NoActionBar"
+                  android:parentActivityName=".ui.activities.UserListActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activities.UserListActivity"/>
         </activity>
     </application>
 

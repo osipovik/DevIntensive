@@ -17,7 +17,9 @@ import android.view.MenuItem;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.response.UserListResponse;
+import com.softdesign.devintensive.data.storage.models.UserDTO;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
+import com.softdesign.devintensive.utils.ConstantManager;
 
 import java.util.List;
 
@@ -75,7 +77,12 @@ public class UserListActivity extends BaseActivity {
                             new UsersAdapter.UserViewHolder.CustomClickListener() {
                         @Override
                         public void onItemClickListener(int position) {
-                            showSnackbar(mCoordinatorLayout, "User index " + position);
+                            UserDTO userDTO = new UserDTO(mUsers.get(position));
+                            Intent profileIntent =
+                                    new Intent(getBaseContext(), ProfileUserActivity.class);
+                            profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
+
+                            startActivity(profileIntent);
                         }
                     });
                     mRecyclerView.setAdapter(mUsersAdapter);
