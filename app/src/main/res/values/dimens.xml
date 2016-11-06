@@ -32,6 +32,8 @@
     <dimen name="profile_image_height">256dp</dimen>
     <dimen name="placeholder_photo_size_90">90dp</dimen>
     <dimen name="user_info_height">112dp</dimen>
-    <dimen name="font_medium_20">20dp</dimen>
+
+    <dimen name="font_large_24">20sp</dimen>
+    <dimen name="font_medium_20">20sp</dimen>
     <dimen name="font_small_14">14sp</dimen>
 </resources>
