@@ -5,6 +5,7 @@ import android.net.Uri;
 import com.softdesign.devintensive.data.network.RestService;
 import com.softdesign.devintensive.data.network.ServiceGenerator;
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
+import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.response.UserModelResponse;
 
 import java.io.File;
@@ -54,6 +55,10 @@ public class DataManager {
                 MultipartBody.Part.createFormData("picture", file.getName(), requestFile);
 
         return mRestService.uploadImage(getPreferencesManager().getUserId(), body);
+    }
+
+    public Call<UserListResponse> getUserList() {
+        return mRestService.getUserList();
     }
 
     //endregion

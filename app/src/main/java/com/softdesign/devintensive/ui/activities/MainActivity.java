@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -266,6 +265,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                     .OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.user_profile_menu:
+                            break;
+                        case R.id.team_menu:
+                            Intent intent = new Intent(getApplicationContext(), UserListActivity.class);
+                            startActivity(intent);
+                            break;
+                    }
                     showSnackbar(item.getTitle().toString());
                     item.setChecked(true);
                     mNavigationDrawer.closeDrawer(GravityCompat.START);
