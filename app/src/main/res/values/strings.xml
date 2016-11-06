@@ -23,4 +23,21 @@
         в шаблонах которых используется Lorem Ipsum.</string>
     <string name="my_profile">Мой профиль</string>
     <string name="team">Команда</string>
+    <string name="user_profile_placeholder_image">Изменить фотографию профиля</string>
+    <string name="user_profile_dialog_gallery">Загрузить из галлереи</string>
+    <string name="user_profile_dialog_camera">Сделать снимок</string>
+    <string name="user_profile_dialog_cancel">Отмена</string>
+    <string name="user_profile_dialog_title">Изменить фотографию профиля</string>
+    <string name="user_profile_choose_message">Выберите фотографию</string>
+    <string name="permission_request">Для корректной работы необходимо дать приложению требуемые разрешения</string>
+    <string name="allow">Разешить</string>
+    <string name="image_create_error">Не удалось создать файл изображения</string>
+    <string name="app_for_action_not_fount_exception">Не найдено приложение для выполнения этого действия</string>
+
+    <string name="auth.login">ВОЙТИ</string>
+    <string name="auth.login_text">ВОЙТИ</string>
+    <string name="auth.email_user">osipovik89@gmail.com</string>
+    <string name="auth.password_text">Пароль</string>
+    <string name="auth.get_password">Забыли пароль?</string>
+    <string name="auth.email_hint_text">Email</string>
 </resources>

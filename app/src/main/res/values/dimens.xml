@@ -19,6 +19,7 @@
     <dimen name="spacing_small_8">8dp</dimen>
     <dimen name="spacing_normal_16">16dp</dimen>
     <dimen name="spacing_medial_24">24dp</dimen>
+    <dimen name="spacing_medial_28">28dp</dimen>
     <dimen name="spacing_medium_32">32dp</dimen>
     <dimen name="spacing_large_56">56dp</dimen>
     <dimen name="spacing_larger_72">72dp</dimen>
@@ -28,4 +29,11 @@
     <dimen name="height_line">72dp</dimen>
     <dimen name="size_avatar_60">60dp</dimen>
     <dimen name="fab_right_space">16dp</dimen>
+    <dimen name="profile_image_height">256dp</dimen>
+    <dimen name="placeholder_photo_size_90">90dp</dimen>
+    <dimen name="user_info_height">112dp</dimen>
+
+    <dimen name="font_large_24">20sp</dimen>
+    <dimen name="font_medium_20">20sp</dimen>
+    <dimen name="font_small_14">14sp</dimen>
 </resources>

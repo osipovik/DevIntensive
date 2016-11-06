@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/spacing_normal_16"
     android:paddingRight="@dimen/spacing_normal_16"
     android:paddingBottom="@dimen/spacing_small_8"
-    android:background="@drawable/drawer_header_bg">
+    android:background="@drawable/nav_header_bg">
 
     <com.softdesign.devintensive.ui.custom.CircleImageView
         android:id="@+id/nav_photo_circle"
@@ -25,7 +25,6 @@
             android:id="@+id/user_name_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Иван Осипов"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:fontFamily="sans-serif-medium" />
@@ -34,7 +33,6 @@
             android:id="@+id/user_email_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="osipovik89@gmail.com"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:fontFamily="sans-serif" />
