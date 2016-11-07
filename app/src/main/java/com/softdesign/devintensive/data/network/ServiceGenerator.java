@@ -34,9 +34,9 @@ public class ServiceGenerator  {
 //        httpClient.connectTimeout(AppConfig.MAX_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
 //        httpClient.readTimeout(AppConfig.MAX_READ_TIMEOUT, TimeUnit.MILLISECONDS);
 
-//        httpClient.cache(
-//                new Cache(DevintensiveApplication.getContext().getCacheDir(), Integer.MAX_VALUE));
-//        httpClient.addNetworkInterceptor(new StethoInterceptor());
+        httpClient.cache(
+                new Cache(DevintensiveApplication.getContext().getCacheDir(), Integer.MAX_VALUE));
+        httpClient.addNetworkInterceptor(new StethoInterceptor());
 
         Retrofit retrofit = sBuilder
                 .client(httpClient.build())

@@ -30,13 +30,13 @@ public class DataManager {
     private PreferencesManager mPreferencesManager;
     private RestService mRestService;
 
-//    private Picasso mPicasso;
+    private Picasso mPicasso;
 
     private DataManager() {
         this.mContext = DevintensiveApplication.getContext();
         this.mPreferencesManager = new PreferencesManager();
         this.mRestService = ServiceGenerator.createService(RestService.class);
-//        this.mPicasso = new PicassoCache(mContext).getPicassoInstance();
+        this.mPicasso = new PicassoCache(mContext).getPicassoInstance();
     }
 
     public static DataManager getInstance() {
@@ -47,9 +47,9 @@ public class DataManager {
         return sInstance;
     }
 
-//    public Picasso getPicasso() {
-//        return mPicasso;
-//    }
+    public Picasso getPicasso() {
+        return mPicasso;
+    }
 
     public PreferencesManager getPreferencesManager() {
         return mPreferencesManager;

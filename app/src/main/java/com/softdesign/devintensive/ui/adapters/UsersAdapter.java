@@ -26,7 +26,7 @@ import java.util.List;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
-//    private final String TAG = getClass().getSimpleName();
+    private final String TAG = getClass().getSimpleName();
     private Context mContext;
     private List<UserListResponse.UserData> mUsers;
     private UserViewHolder.CustomClickListener mCustomClickListener;
@@ -49,49 +49,49 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(final UsersAdapter.UserViewHolder holder, int position) {
         UserListResponse.UserData user = mUsers.get(position);
-//        final String userPhoto;
-//
-//        if (user.getPublicInfo().getPhoto().isEmpty()) {
-//            userPhoto = "null";
-//            Log.e(TAG, "onBindViewHolder: user with name "  + user.getFullName() + " hasn't photo");
-//        } else {
-//            userPhoto = user.getPublicInfo().getPhoto();
-//        }
+        final String userPhoto;
 
-//        DataManager.getInstance().getPicasso()
-//                .load(userPhoto)
-//                .error(holder.mDummy)
-//                .placeholder(holder.mDummy)
-//                .fit()
-//                .centerCrop()
-//                .networkPolicy(NetworkPolicy.OFFLINE)
-//                .into(holder.userPhoto, new Callback() {
-//                    @Override
-//                    public void onSuccess() {
-//                        Log.d(TAG, "Image successfully load from cache");
-//                    }
-//
-//                    @Override
-//                    public void onError() {
-//                        DataManager.getInstance().getPicasso()
-//                                .load(userPhoto)
-//                                .error(holder.mDummy)
-//                                .placeholder(holder.mDummy)
-//                                .fit()
-//                                .centerCrop()
-//                                .into(holder.userPhoto, new Callback() {
-//                                    @Override
-//                                    public void onSuccess() {
-//                                        Log.d(TAG, "Image successfully load from network");
-//                                    }
-//
-//                                    @Override
-//                                    public void onError() {
-//                                        Log.d(TAG, "Could not fetch image");
-//                                    }
-//                                });
-//                    }
-//                });
+        if (user.getPublicInfo().getPhoto().isEmpty()) {
+            userPhoto = "null";
+            Log.e(TAG, "onBindViewHolder: user with name "  + user.getFullName() + " hasn't photo");
+        } else {
+            userPhoto = user.getPublicInfo().getPhoto();
+        }
+
+        DataManager.getInstance().getPicasso()
+                .load(userPhoto)
+                .error(holder.mDummy)
+                .placeholder(holder.mDummy)
+                .fit()
+                .centerCrop()
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(holder.userPhoto, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Image successfully load from cache");
+                    }
+
+                    @Override
+                    public void onError() {
+                        DataManager.getInstance().getPicasso()
+                                .load(userPhoto)
+                                .error(holder.mDummy)
+                                .placeholder(holder.mDummy)
+                                .fit()
+                                .centerCrop()
+                                .into(holder.userPhoto, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Image successfully load from network");
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.d(TAG, "Could not fetch image");
+                                    }
+                                });
+                    }
+                });
 
         holder.mFullName.setText(user.getFullName());
         holder.mRating.setText(String.valueOf(user.getProfileValues().getRating()));
