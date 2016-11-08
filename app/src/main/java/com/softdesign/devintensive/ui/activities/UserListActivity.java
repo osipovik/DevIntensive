@@ -1,33 +1,34 @@
 package com.softdesign.devintensive.ui.activities;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
 
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
-import com.softdesign.devintensive.data.network.response.UserListResponse;
+import com.softdesign.devintensive.data.storage.models.User;
 import com.softdesign.devintensive.data.storage.models.UserDTO;
 import com.softdesign.devintensive.ui.adapters.UsersAdapter;
+import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.ConstantManager;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class UserListActivity extends BaseActivity {
     @BindView(R.id.main_coordinator_layout)
@@ -42,12 +43,17 @@ public class UserListActivity extends BaseActivity {
     @BindView(R.id.user_list)
     RecyclerView mRecyclerView;
 
+    private MenuItem mSearchItem;
+
     DataManager mDataManager;
     UsersAdapter mUsersAdapter;
-    List<UserListResponse.UserData> mUsers;
+    List<User> mUsers;
+    String mQuery;
+    Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // TODO: 08.11.16 сохранять состояние активности для восстановления при перевороте экрана
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
 
@@ -58,44 +64,26 @@ public class UserListActivity extends BaseActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
+        mHandler = new Handler();
+
         setupToolbar();
         setupDrawer();
-        loadUsers();
+        // TODO: 08.11.16 добавить отображение прогресса загрузки, до того как данные будут готовы
+        // TODO: 08.11.16 вынести чтение из базы в отдельный поток
+        loadUsersFromDb();
     }
 
     /**
      *
      */
-    private void loadUsers() {
-        Call<UserListResponse> call = mDataManager.getUserList();
-        call.enqueue(new Callback<UserListResponse>() {
-            @Override
-            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
-                if (response.code() == 200) {
-                    mUsers = response.body().getData();
-                    mUsersAdapter = new UsersAdapter(mUsers,
-                            new UsersAdapter.UserViewHolder.CustomClickListener() {
-                        @Override
-                        public void onItemClickListener(int position) {
-                            UserDTO userDTO = new UserDTO(mUsers.get(position));
-                            Intent profileIntent =
-                                    new Intent(getBaseContext(), ProfileUserActivity.class);
-                            profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
+    private void loadUsersFromDb() {
+        mUsers = mDataManager.getUserListFromDb();
 
-                            startActivity(profileIntent);
-                        }
-                    });
-                    mRecyclerView.setAdapter(mUsersAdapter);
-                } else {
-                    showSnackbar(mCoordinatorLayout, "");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserListResponse> call, Throwable t) {
-
-            }
-        });
+        if (mUsers.size() == 0) {
+            showSnackbar(mCoordinatorLayout, "Список пользователей не может быть загружен");
+        } else {
+            showUsers(mUsers);
+        }
     }
 
     /**
@@ -109,6 +97,62 @@ public class UserListActivity extends BaseActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.search_menu, menu);
+
+        mSearchItem = menu.findItem(R.id.search_action);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(mSearchItem);
+        searchView.setQueryHint("Введите имя пользователя");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                showUsersByQuery(newText);
+                return false;
+            }
+        });
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void showUsers(List<User> users) {
+        mUsers = users;
+
+        mUsersAdapter = new UsersAdapter(mUsers,
+                new UsersAdapter.UserViewHolder.CustomClickListener() {
+                    @Override
+                    public void onItemClickListener(int position) {
+                        UserDTO userDTO = new UserDTO(mUsers.get(position));
+                        Intent profileIntent =
+                                new Intent(getBaseContext(), ProfileUserActivity.class);
+                        profileIntent.putExtra(ConstantManager.PARCELABLE_KEY, userDTO);
+
+                        startActivity(profileIntent);
+                    }
+                });
+
+        mRecyclerView.swapAdapter(mUsersAdapter, false);
+    }
+
+    private void showUsersByQuery(String query) {
+        mQuery = query;
+        // TODO: 08.11.16 при отмене ввода сразу запускать отображение всех данных 1:22:00
+        Runnable searchUsers = new Runnable() {
+            @Override
+            public void run() {
+                showUsers(mDataManager.getUserListByName(mQuery));
+            }
+        };
+
+        mHandler.removeCallbacks(searchUsers);
+        mHandler.postDelayed(searchUsers, AppConfig.SEARCH_DELAY);
     }
 
     /**

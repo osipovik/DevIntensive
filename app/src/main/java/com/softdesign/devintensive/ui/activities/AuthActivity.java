@@ -3,9 +3,11 @@ package com.softdesign.devintensive.ui.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,7 +16,13 @@ import android.widget.TextView;
 import com.softdesign.devintensive.R;
 import com.softdesign.devintensive.data.managers.DataManager;
 import com.softdesign.devintensive.data.network.request.UserLoginRequest;
+import com.softdesign.devintensive.data.network.response.UserListResponse;
 import com.softdesign.devintensive.data.network.response.UserModelResponse;
+import com.softdesign.devintensive.data.storage.models.Repository;
+import com.softdesign.devintensive.data.storage.models.RepositoryDao;
+import com.softdesign.devintensive.data.storage.models.User;
+import com.softdesign.devintensive.data.storage.models.UserDao;
+import com.softdesign.devintensive.utils.AppConfig;
 import com.softdesign.devintensive.utils.NetworkStatusChecker;
 
 import java.util.ArrayList;
@@ -31,7 +39,10 @@ import retrofit2.Response;
  */
 
 public class AuthActivity extends BaseActivity implements View.OnClickListener {
+    public final String TAG = getClass().getSimpleName();
     private DataManager mDataManager;
+    private RepositoryDao mRepositoryDao;
+    private UserDao mUserDao;
 
     @BindView(R.id.btn_login)
     Button loginBtn;
@@ -69,10 +80,15 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_auth);
 
         mDataManager = DataManager.getInstance();
+        mUserDao = mDataManager.getDaoSession().getUserDao();
+        mRepositoryDao = mDataManager.getDaoSession().getRepositoryDao();
 
         ButterKnife.bind(this);
         ButterKnife.apply(loginBtn, setBtnOnClickListener);
         ButterKnife.apply(mRememberPassword, setTextOnClickListener);
+
+        // TODO: 08.11.16 добавить проверку, если токен уже есть, то сразу переходим к списку
+        // TODO: 08.11.16 обработать нажатие кнопки "забыл пароль" 
 //        mRememberPassword.setOnClickListener(this);
     }
 
@@ -102,9 +118,17 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener {
         saveUserPhoto(userModel.getData().getUser().getPublicInfo());
         saveUserValues(userModel.getData().getUser().getProfileValues());
         saveUserFields(userModel.getData().getUser());
+        // TODO: 08.11.16 вынести запись в базу в отдельный поток
+        saveUsersToDB();
 
-        Intent loginIntent = new Intent(this, MainActivity.class);
-        startActivity(loginIntent);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent loginIntent = new Intent(AuthActivity.this, UserListActivity.class);
+                startActivity(loginIntent);
+            }
+        }, AppConfig.START_DELAY);
     }
 
     private void signIn() {
@@ -167,5 +191,52 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener {
         userFields.add(user.getPublicInfo().getBio());
 
         mDataManager.getPreferencesManager().saveUserProfileData(userFields);
+    }
+
+    private void saveUsersToDB() {
+        Call<UserListResponse> call = mDataManager.getUserListFromNetwork();
+
+        call.enqueue(new Callback<UserListResponse>() {
+
+            @Override
+            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
+                try {
+                    if (response.code() == 200) {
+                        List<Repository> allRepositories = new ArrayList<>();
+                        List<User> allUsers = new ArrayList<>();
+
+                        for (UserListResponse.UserData userRes : response.body().getData()) {
+                            allRepositories.addAll(getUserRepoList(userRes));
+                            allUsers.add(new User(userRes));
+                        }
+
+                        mRepositoryDao.insertOrReplaceInTx(allRepositories);
+                        mUserDao.insertOrReplaceInTx(allUsers);
+                    } else {
+                        showSnackbar(mCoordinatorLayout, "список пользователейй не может быть получен");
+                        Log.d(TAG, "onResponse " + String.valueOf(response.errorBody().source()));
+                    }
+                } catch (NullPointerException e) {
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserListResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private List<Repository> getUserRepoList(UserListResponse.UserData userData) {
+        final String userId = userData.getId();
+
+        List<Repository> repositories = new ArrayList<>();
+
+        for (UserModelResponse.Repo repositoryRes : userData.getRepositories().getRepo()) {
+            repositories.add(new Repository(repositoryRes, userId));
+        }
+
+        return repositories;
     }
 }

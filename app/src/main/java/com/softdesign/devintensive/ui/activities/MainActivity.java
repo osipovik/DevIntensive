@@ -14,6 +14,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -623,7 +625,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
      */
     private void insertProfileImage(Uri selectedImage, boolean init) {
         final Uri image = selectedImage;
-
+        // TODO: 08.11.16 добавить кэширование картинки
         Picasso.with(this)
                 .load(selectedImage)
                 .placeholder(R.drawable.user_bg)
@@ -660,21 +662,30 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 .findViewById(R.id.nav_photo_circle);
 
         if (image.getScheme().equals("http") || image.getScheme().equals("https")) {
-            new Thread(new Runnable() {
+            final Drawable[] circleImage = {null};
+            final Handler setImageHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    circlePhoto.setImageDrawable(circleImage[0]);
+                }
+            };
+
+            Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         HttpURLConnection connection = null;
                         connection = (HttpURLConnection) new URL(image.toString()).openConnection();
                         connection.connect();
-                        InputStream input = null;
-                        input = connection.getInputStream();
-                        circlePhoto.setImageDrawable(Drawable.createFromStream(input, image.toString()));
+                        InputStream input = connection.getInputStream();
+                        setImageHandler.sendEmptyMessage(1);
+                        circleImage[0] = Drawable.createFromStream(input, image.toString());
                     } catch (IOException e) {
 
                     }
                 }
-            }).start();
+            });
+            t.start();
         } else {
             try {
                 circlePhoto.setImageDrawable(Drawable.createFromStream(

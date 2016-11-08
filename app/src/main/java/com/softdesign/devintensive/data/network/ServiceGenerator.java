@@ -31,8 +31,8 @@ public class ServiceGenerator  {
         httpClient.addInterceptor(new HeaderInterceptor());
         httpClient.addInterceptor(logging);
 
-//        httpClient.connectTimeout(AppConfig.MAX_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
-//        httpClient.readTimeout(AppConfig.MAX_READ_TIMEOUT, TimeUnit.MILLISECONDS);
+        httpClient.connectTimeout(AppConfig.MAX_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
+        httpClient.readTimeout(AppConfig.MAX_READ_TIMEOUT, TimeUnit.MILLISECONDS);
 
         httpClient.cache(
                 new Cache(DevintensiveApplication.getContext().getCacheDir(), Integer.MAX_VALUE));

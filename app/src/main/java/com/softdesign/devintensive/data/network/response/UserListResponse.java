@@ -52,6 +52,10 @@ public class UserListResponse {
         @Expose
         private String updated;
 
+        public String getId() {
+            return id;
+        }
+
         public UserModelResponse.Repositories getRepositories() {
             return repositories;
         }
